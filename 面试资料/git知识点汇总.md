@@ -1,0 +1,364 @@
+# 1. git工作流(git flow)
+- `master`：为主分支，属保护分支，不能直接对此进行代码修改和提交
+- `develop`：是日常使用分支
+- `feature`：为新功能分支，当完成一个功能并测试通过后进行合并到develop分支中
+- `hotfix`：线上紧急修复漏洞分支，从`master`分支拉取创建，修复完bug后合并到`master`和`devlop`分支
+
+
+最大原则叫做`上游有限`即只存在一个主分支`master`，它是所有其他分支的`上游`。只有上游分支采纳的分支变化，才能应用到其他分支
+
+`master -> pre-production -> production`
+
+- `master`：开发环境分支
+- `pre-production`： 预发环境分支
+- `production`：生产环境分支
+
+
+#### 工作流程(GitFlow)
+- 分成一组`feature`功能
+- 合并`feature分支`到`develop分支`
+- 进入测试阶段，创建`release分支`
+- 测试过程中存在bug，直接`release分支`上进行修复并提交
+- 测试完成后，合并`release分支`到`master`和`develop分支`
+- 此时的`master分支`应该是最新的，稳定的代码，部署上线
+
+
+
+
+
+
+# 2. git commit 工作规范
+#### 为什么需要规范 commit 日志？
+- `commit message` 是程序员开发的日常操作，但是实际工作中缺常常被大家忽略
+- 目前 `commit message ` 处于五花八门的书写风格，十分不利于阅读和维护
+- 优秀的互联网科技公司都有一套代码提交规范，尤其是在一些大型的开源项目中，`commit message` 都是十分一致
+
+#### 规范commit日志的好处
+- 团队形成一致的风格提交代码，更好的提高工作效率
+- 规范的 `commit message` 有利于团队其他人员review，还可以有效的输出 `CHANGELOG`，对项目十分重要
+- 成为一名有追求的工程师 
+
+
+
+#### 需要下载的包
+`commitizen`：实现规范的提交说明的工具
+
+是一个格式化 commit message 的工具，它的安装需要 NPM 的支持，NPM 是 Node.js的包管理工具，所以首先安装 node.js，下载对应系统的包，安装即可
+
+```js
+npm install -g commitizen
+```
+
+`changelog插件`：方便查看 changlog 日志文件
+```j
+npm install -g conventional-changelog
+npm install -g conventional-changelog-cli
+```
+
+执行，检验是否安装成功
+
+```js
+npm ls -g -depth=0
+```
+
+运行下面命令，使其支持 Angular 的 Commit message 格式
+
+```js
+commitizen init cz-conventional-changelog --save --save-exact
+```
+
+然后进入到你要操作的项目目录，执行
+
+```js
+conventional-changelog -p angular -i CHANGELOG.md -s
+```
+
+此时项目多了 CHANGELOG.md 文件，表示生成 Change log 成功了。以后，凡是用到 git commit 命令的时候统一改为 git cz，然后就会出现选项，生成符合格式的 Commit Message。
+
+
+```j
+npm install -g conventional-changelog
+npm install -g conventional-changelog-cli
+```
+
+执行，检验是否安装成功
+
+```js
+npm ls -g -depth=0
+```
+
+运行下面命令，使其支持 Angular 的 Commit message 格式
+
+```js
+commitizen init cz-conventional-changelog --save --save-exact
+```
+
+然后进入到你要操作的项目目录，执行
+
+```js
+conventional-changelog -p angular -i CHANGELOG.md -s
+```
+
+此时项目多了 CHANGELOG.md 文件，表示生成 Change log 成功了。以后，凡是用到 git commit 命令的时候统一改为 git cz，然后就会出现选项，生成符合格式的 Commit Message。
+
+#### commit message 包括三个部分 Header Body Footer
+```js
+<type>(<scope>):<subject>   // 必填项：主要是【提交类型（提交类型）：简要描述】
+
+<body> // 详细描述
+
+<footer> // 页脚为破坏性改变或关闭了某个issue
+```
+
+Header是必需的  Body和Footer是可选
+
+`type`用于说明commit的类别，只允许使用下面7个标识
+- feat: 新功能(feature)
+- fix: 修复bug
+- dosc: 文档(documentation)
+- style: 格式（不影响代码运行的变动）
+- refactor：重构（即不是新增功能，也不是修改bug的代码变动）
+- test：增加测试    
+- chore：构建过程和辅助工具的变动
+
+`scope`：用于说明 commit 的影响范围，比如数据层丶控制层丶视图层等等，视项目不同而不同
+
+`subject` 是 commit 的简短描述，不超过 50 个字符
+
+- 以动词开头，使用第一人称现在时，比如change，而不是changed或changes
+- 第一个字母小写
+- 结尾不写句号（.）
+
+
+
+
+
+
+# 3. SVN 和 GIT 的区别
+## 系统特点
+
+- SVN 是集中式版本控制系统，版本库是集中存放在中央服务器的，每次开发的时候都是需要从中央服务器取得最新的版本，开发完再把代码推送到中央服务器
+- GIT 是分布式版本控制系统，每个人都是一个完整的版本库
+
+## 安全性
+
+- GIT 是分布式，安全性高，因为每个人电脑里都有完整的版本库，假如某个人的电脑坏了，随便从其他人哪里复制一个就行了。
+- 而集中式版本控制系统的中央服务器要是出问题，所有人没发干活
+
+## 完整性
+
+- GIT 的内容完整性是优于 SVN，GIT 的内容存储使用的是 SHA-1 哈希算法，这能确保代码内容的完整性，确保在遇到的磁盘故障和网络问题时减低对版本库的破坏。
+
+## 存储方式
+
+- GIT 把内容按 元数据 方式存储
+- SVN 是按 文件 方式存储的  
+
+## 全局版本号
+
+- GIT 没有一个全局的版本号，而 SVN 有
+- 分支在 SVN 中就是版本库的另外一个目录，  
+
+## 工作模式的区别
+
+- SVN的工作模式
+  - 写代码
+  - 从服务器拉回服务器的当前版本库，并解决服务器版本库和本地代码的冲突
+  - 从将本地代码提交到服务器
+- GIT的工作模式
+  - 写代码
+  - 提交到本地版本库
+  - 从服务器拉取服务器的当前版本库，并解决服务器版本库和本地代码的冲突
+  - 将远程与本地代码合并到本地版本库
+  - 将本地版本库推送到服务器 
+
+## 提交方式
+
+- GIT 离线可提交
+- SVN 只允许在线提交
+
+
+
+
+
+# 4. 什么是GIT中的“裸存储库”
+GIT 中的“裸存储库”只包含版本控制信息而没有工作文件（没有工作树），并且它不包含特殊的`.git`子目录。相反，它直接在主目录本身包含`.git`子目录中的所有内容，其中工作目录包含：   
+- 一个`.git`子目录，其中包含你的仓库所有相关的Git修改历史记录
+- 工作树，或签出的项目文件的副本   
+
+
+
+
+
+
+# 5. Git是用什么语言编写的？
+- Git 使用 C 语言编写
+- 由于 C 语言通过减少运行时的开销做到这一点，所以 GIT 很快
+
+
+
+
+
+
+# 6. 在 Git 中，你如何还原已经 Push 并公开的提交？
+**有时候，在`git push`，才发现还有一些代码需要进行很小的改动，这些改动在原则上不应该作为一次新的提交，这时候需要撤销这次的推送`git push`和提交`git commit`，然后再进行重新的代码修改，再重新进行提交和推送。** 
+
+- 撤销提交信息
+  - 通过`git log`查看提交信息，以便获取需要回退至的版本号
+  - 通过`git reset -soft <版本号>`重置至指定版本的提交，以达到撤销提交的目的
+  - 然后通过`git log`确认是否成功撤销
+- 撤销版本号
+  - 通过`git push origin master -force`强制提交当前版本号，以达到撤销版本号的目的
+  - 必须添加参数`force`进行强制提交，否则会提交失败，并报错
+  - 报错原因：本地项目版本号低于远端
+-  修改代码，重新提交和推送
+   -  修改代码，添加修改`git add .`
+   -  重新提交 `git commit -m 'xxxx'`
+   -  重新推送 `git push origin master`      
+
+
+
+
+
+# 7. `git pull` 和 `git fetch` 有什么区别？
+
+<img src="https://user-gold-cdn.xitu.io/2019/8/12/16c84ff492a9de1a?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+
+**相同点：都起到更新代码的作用**
+
+- 远端跟踪分支不同
+  - `git fetch`：`git fetch`能够直接更改远端跟踪分支
+  - `git pull`：`git pull`无法直接对远程跟踪分支操作，我们必须想切回本地分支然后创建一个新的`commit`提交
+- 拉取不同
+  - `git fetch`：`git fetch`会将数据拉取到本地仓库，它并不会自动合并或修改当前工作
+  - `git pull`：`git pull`是从远程获取最新版本并merge到本地，会自动合并或修改当前的工作 
+
+
+
+
+
+# 8. `git`中的`staging area`或`index`(暂存区)是什么？
+
+<img src="https://img-blog.csdnimg.cn/img_convert/cc3510e8f32578ed0f39756e298749de.png">
+
+在完成提交之前，可以成为`staging area`或`index`的中间区域中对其进行格式化和审查。每个更改首先在暂存区域中进行验证，我将其称为`stage file`，然后将更改提交到存储库。
+
+
+
+
+
+# 9. 什么是`git stash`
+通常情况下，当你一直在处理项目的某一部分，如果你想要在某个时候切换分支去处理其他事情，事情会处于混乱的状态。
+
+`git stash`会将你的工作目录，即修改后的跟踪文件和暂存的更改保存在一堆未完成的更改中，你可以随时重新应用这些更改。
+
+
+
+
+# 10. 什么是`git stash drop`
+命令恢复之前缓存的工作目录，将缓存栈堆中的对应的stash删除，并将对应修改应用到当前的工作目录下，默认为第一个stash，即stash@{0}，如果要应用并删除其他的stash，命令: git stash pop stash{$num}，比如应用并输出第二个；`git stash pop stash{1}`
+
+
+
+
+
+# 11. 如何找到特定提交中已更改的文件列表？
+
+```js
+git log 
+git show --stat [commitId]
+```
+
+
+
+
+
+
+# 12. `git config`的功能是什么？
+git使用你的用户名将提交与身份相关联。`git config`命令可用来更改你的`git`配置，包括你的用户名。
+
+假设你要提供的用户名和电子邮件ID用来将提交与身份相关联，以便你可以知道是谁进行了特定提交    
+- `git config --global  user.name "Your Name"`:此命令添加用户名
+- `git config --global  user.email  "Your E-mail Address"`：此命令将添加电子邮件ID
+
+
+
+
+
+# 13. 提交对象包括什么？
+
+
+
+
+
+
+# 14. 如何在`Git`中创建存储库？
+- 要创建存储库，先为项目创建一个目录（如果该目录不存在），然后运行命令`git init`。    
+- 通过运行此命令，将在项目的目录中创建`.git`目录
+
+
+
+
+
+
+# 15. 怎样将N次提交压缩成一次提交？
+
+**场景：有时候我们需要修改一个 Bug 或者一段代码的时候，commit 一次之后，发现 Bug 没改对或者这段代码需要再优化之类的，改完之后又 commit 了一次或多次，这样就会感提交历史不太美观（有点强迫症），这个时候我们就希望只保留一次提交历史记录，合并为一个完整的提交，这个时候我们该怎么办呢?`git rebase`应运而生！**
+
+- 查看提交历史`git log`
+- `git rebase`(有两种方法)
+  - `git rebase -i HEAD~3` 从HEAD版本开始过去数3个版本
+  - `git rebase -i <commit ID>`:指名要合并的版本之前的版本号，但是请注意这个`<commit ID>`版本不参与合并的，可以把它当作一个坐标
+- 选取要合并的提交
+  - 会弹出窗口
+  - 把 `pick` 改为 `squash` 或者 `s`，之后保存并关闭文本编辑窗口即可
+  - `ESC`：退出编辑目录， `:wq`：保存退出，
+  - Git 会压缩提交历史，如果有冲突，需要修改，修改的时候要注意，保留最新的历史，不然我们的修改就丢失了。修改之后执行下面命令`git add .`和`git rebase --continue`，如果你放弃这次压缩命令`git rebase --abort
+  - 没有冲突输入`:wq`保存再退出，再输入`git log`查看commit信息，你会发现这两个comit已经合并了  
+
+
+
+
+
+
+# 16. 什么时候使用 `git rebase` 代替 `git merge`?
+**应用场景：比如项目有 `master` 分支和 `dev` 分支，有 A 和 B 两个同学，当 A 在 `dev` 分支开发中，在本地推送四次 `commit`，B 突然在远程 `master` 推送一次。**
+
+## 直接`git merge`
+
+<img src="https://backlog.com/git-tutorial/cn/img/post/stepup/capture_stepup1_4_3.png">
+
+<img src="https://backlog.com/git-tutorial/cn/img/post/stepup/capture_stepup1_4_4.png">
+
+- A 切换到 `master` 分支上，拉取最新的 `master` 分支代码
+- 然后用`git merge dev` 合并 `dev` 分支的代码
+- 这个时候 git 会找 `dev` 分支和 `master` 分支最近的共同的 `commit结点`，然后将 `dev` 分支最新一次 `commit` 和 `master` 分支最新一次 `commit` 合并生成一个新的 `commit`，如果有冲突则需要解决，最后将 `dev` 分支和 `master` 分支上的提交，自公共 `commit结点` 之后按照 `提交时间的先后顺序` 进行放到 master 分支上
+
+## `git rebase `之后再 `git merge`
+
+<img src="https://backlog.com/git-tutorial/cn/img/post/stepup/capture_stepup1_4_6.png">
+
+<img src="https://backlog.com/git-tutorial/cn/img/post/stepup/capture_stepup1_4_7.png">
+
+
+
+- `rebase` 之前需要切换到 `master` 分支，将 `master` 分支拉到最新
+- 切换到需要 `rebase` 的分支，这里切换到 `dev` 分支
+- 执行 `git rebase master`，有冲突的话就解决冲突，解决之后直接 `git add .`，然后再 `git rebase --continue` 即可
+- 可以用 `git log` 查看 `commit` 记录来校验一下
+- 最后切换到 `master` 分支，执行 `git merge dev`
+
+## 总结
+- `git merge` 操作合并分支会让两个分支的每一次提交都按照提交时间（并不是`push时间`）排序，并且会将两个分支的最新一次 `commit` 点进行合并成一个新的`commit`，最终的分支呈现非整条线性直线的形式
+- `git rebase` 操作实际上是将当前执行 `rebase` 分支的所有基于原分支提交点之后的 `commit` 打散成一个一个的 `patch`，并重新生成一个新的 `commit hash` 值，再次基于原分支目前 `最新commit` 点上进行提交，并不根据两个分支上实际的每次提交时间点排序，rebase完成之后，切换到基分支进行合并另一条分支也不会生成一个新的commit点，可以保持整个分支树的完美线性
+
+## 使用场景
+
+- 在 topic 分支中更新 merge 分支的最新代码，请使用 rebase
+- 向 merge 分支中导入 topic 分支的话，先使用 rebase，再使用 merge
+
+
+## 
+18 git 修改或者不要提交的commit信息
+
+git 修复紧急Bug

@@ -1,0 +1,1779 @@
+# 1. 谈谈你对 webpack 的看法?
+- webpack 是一个模块打包工具，可以使用它管理项目中的模块依赖，并编译输出模块所需的静态文件。
+
+- 它可以很好的管理丶打包开发中所用到的 HTML丶CSS丶JavaScript 和静态文件（图片丶字体）等，让开发更加高效。
+
+- 对于不同类型的依赖，webpack 有对应的模块加载器，而且会分析模块间的依赖关系，最终合并生成优化的静态资源。
+
+- 当 webpack 处理应用程序时，它会递归地构建一个依赖关系图，其中包含应用程序需要的每个模块然后将这些模块打包成一个或多个 bundle。
+
+​    
+
+
+
+
+# 2. webpack 与 gulp 的区别?
+> Grunt丶Gulp 是基于任务运行的工具
+- 他们会自动执行指定的任务，就像流水线，把资源放上去然后通过不同插件进行加工，他们包含活跃的社区，丰富的插件，能方便的打造各种工作流。
+> webpack 是基于模块化打包的工具
+- 自动处理模块，webpack 把一切当成模块，当 webpack 处理应用程序时，他们会递归地构建一个依赖关系图，其中包含应用程序所需的每个模块，然后将这些模块打包成一个或多个 bundle.
+
+
+
+
+
+# 3. Webpack 的核心概念？
+- `mode`: 模式。对应有开发模式丶 生产模式等
+- `entry`: 入口
+- `ouput`: 出口
+- `loader`: 模块转换器，用于将模块原内容按照需求转换成新内容。webpack 对于 `.jpg`丶 `txt`等内容无法处理，就需要 `file-loader `丶`url-loader `等进行协助处理。
+- `plugin`: 拓展插件，在 webpack 构建流程中的特定时机注入拓展逻辑来改变构建结果或者做其他你想做的事情
+
+
+
+
+
+
+# 4. loader和plugin区别是什么？有哪些常用的loader和plugin?
+### 区别：
+
+- `Loader` 让`webpack `能够处理哪些非 `JavaScript` 文件，可以将所有类型的文件转换成能够处理的有效模块，利用 `webpack` 的打包能力对它们进行处理。
+- `plugin` 插件则可以用于执行范围更广的任务。插件的范围包括，从打包优化和压缩，一直到重新定义环境中的变量。
+
+### 常用的Loader：
+
+- **file-loader：**将文件发送到输出文件夹，并返回(相对) URL
+- **url-loader：**像 file-loader 一样工作，但如果文件小于限制，可以返回data URL
+- **babel-loader：**加载ES2015+代码，并且将代码转译成ES5
+- **style-loader：** 将模块的导出作为样式添加到 DOM 中
+- **css-loader：** 解析 CSS 文件后，使用 import 加载，并且返回 CSS 文件
+
+### 常用Plugin
+
+- **html-webpack-plugin：**简单创建 HTML 文件，用于服务器访问
+- **extract-text-webpack-plugin：**从 bundle 中提取文本（CSS）到单独文件
+
+
+
+
+
+
+# 5. 使用 Webpack 开发时，你用过哪些可以提高效率的插件?
+- **webpack-dashboard：**可以更友好的展示相关打包信息？
+- **webpack-merge：** 提取公共配置，减少重复配置代码
+- **speed-measure-webpack-plugin：**简称SMP，分析出 Webpack 打包过程中 Loader 和 Plugin 的耗时，有助于知道构建过程中性能瓶颈
+- **size-plugin：**监控资源体积变化，尽早发现问题
+- **HotModuleReplacementPlugin：** 模块热更新插件
+
+
+
+
+
+
+# 6. Webpack 构建流程？
+webpack 就像一条生产线，要经过一系列处理流程后才能将源文件转换成输出结果。
+
+这条市场线上的每个处理流程的职责都是单一的，多个流程之间有存在依赖关系，只有完成当前处理后才能交给下一个流程去处理。
+
+**webpack 的运行流程是一个串行的过程，从启动到结束会依次执行以下流程**
+
+- **初始化参数**: 从配置文件和 `shell` 语句中读取与合并参数，得出最终的参数
+- **开始编译**：从上一步得到的参数初始化 `compiler` 对象，加载所有配置的插件，执行对象的 `run` 方法开始执行编译
+- **确定入口**：根据配置中的 `entry` 找出所有入口文件。
+- **模块编译**：从入口文件出发，调用所有配置的`loader`对模块进行翻译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理
+- **完成模块编译**：在经过第4步使用 `Loader` 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及他们之间的依赖关系
+- **输出资源**：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的`Chunk`，再把每个 `Chunk` 转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会。  
+- **输出完成**：在确定好删除内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
+
+**在以上过程中，`Webpack` 会在特定的时间点广播出特定的事件，插件在监听感兴趣的事件后会执行特定的逻辑，并且插件可以调用 webpack 提供的 API 改变 webpack 的运行结果。**
+
+
+
+
+
+
+# 7. Webpack 打包原理？
+将所有依赖打包成一个  bundle.js，通过代码分割成单元片断按需加载
+
+
+
+
+
+
+# 8. Webpack 如何配置单页面和多页面的应用程序？
+- 单页面应用可以理解为 Webpack 的标准模式，直接在 entry 中指定单页面应用的入口即可。
+
+- **多页面打包的原理就是：配置多个`entry`和多个`HtmlWebpackPlugin`**
+
+代码分割
+
+- 把多个页面共用的第三方库（比如 React，Fastclick）单独打包出一个 vendor.js
+- 把多个页面共用的代码逻辑和共用的全局 CSS （比如 CSS-reset，icon字体图标）单独打包出 common.js 和 common.css
+- 把运行时代码单独提取出来 manifest.js
+- 把每个项目自己的业务代码打包出 page1.js 和 page1.css
+
+hash
+
+最后打包出来的文件，我们希望带上 hash 的值，这样可以充分利用浏览器缓存。webpack 中 hash 丶 chunkhash丶contenthash：生产环境，我们一般使用 contenthash，而开发环境其实不指定 hash
+
+```js
+const apiMocker = require("mocker-api");
+
+module.exports = {
+    // dev 开发环境
+    devServer: {
+        before(app) { // 本地 Mock 数据
+            apiMocker(app, path.resolve(__dirname, "../mocker/index.js"))
+        },
+        proxy:  {
+            "/api": { // 代理解开
+                target: "http://anata.me", // 后端联调地址
+                changeOrigin: true,
+                secure: false
+            }
+        }
+    }
+    entry: {
+        "page1", "./src/pages/page1.app.js", // 页面1，
+        "page2", "./src/pages/page2.app.js", // 页面2
+    },
+    // dev 开发环境
+    ouput: {
+        path: path.resolve(__dirname, "./dist"),
+        filename: 'js/[name]/[name]-bundle.js', // filename不能写死，只能提高[name]提取bundle的名字
+        chunkFilename: 'js/[name]/[name]-bundle.js' 
+    },
+    // prod 生产环境
+    ouput: {
+        path: path.resolve(__dirname, "./dist"),
+        filename: 'js/[name]/[name]-bundle.[contenthash:8].js', // filename不能写死，只能提高[name]提取bundle的名字
+        chunkFilename: 'js/[name]/[name]-bundle.[contenthash:8].js' 
+    },
+    plugins: [
+        new HtmlWebpackPlugin(
+        {
+            template: "./src/pages/page1/index.html",
+            chunks: [page1],
+		}
+    ),  new HtmlWebpackPlugin(
+        {
+            template: "./src/pages/page2/index.html",
+            chunks: [page2],
+        }
+    ],
+    optimization: {
+     splitChunks: {
+       cacheGroups: {
+       	 // 打包业务中公共代码
+         common: {
+            name: "common",
+            chunks: "initial",
+            minSize: 1,
+            priority: 0,
+            minChunks: 2 // 同时引用了 2 次才打包
+         }，
+         // 打包第三方库的文件
+         vendor: {
+        	name: "vendor",
+            test: /[\\/]node_modules[\\/]/,
+            chunks: "initial",
+            priority: 10,
+            minChunks: 2 // 同时引用了 2 次才打包
+        }
+       }       
+     }，
+     runtimeChunk: { name: "manifest" } // 运行时代码
+    }
+}
+```
+
+
+
+多页面应用的话，可以使用 webpack 的 `AutoWebPlugin` 来完成简单自动化的构建，但是前提是项目的目录结构必须遵循他预设的规范。多页应用中要注意的是：
+
+- 每个页面都有公共的代码，可以将这些代码抽离出来，避免重复的加载，比如，每个页面都引用同一套CSS样式表。
+- 随着业务的不断扩展，页面可能会不断的追加，所以一定要让入口的配置足够灵活，避免每次添加新页面还需要修改构建配置
+
+
+
+
+
+
+# 9. webpack-dev-server 和 http 服务器如 nginx 有什么区别？
+`webpack-dev-server` 使用内存来存储 `webpack` 开发环境下的打包文件，并且可以使用模块热更新，相比传统 http 服务器开发更加简单高效。
+
+
+
+
+
+# 10. 什么是模块热更新？
+
+<img src="https://user-gold-cdn.xitu.io/2019/12/1/16ec13499800dfce?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+
+HMR 作为一个 webpack 内置的功能，可以通过 HotModuleReplacementPlugin 或 --hot 开启。
+
+**webpack 热更新又称热替换（`Hot Module Replacement`），缩写为 `HMR`。这个机制可以做到不用刷新向浏览器刷新变更的模块替换就的模块**
+
+注：webpack-dev-server 是一个小型的 Node.js Express 服务器，它使用 webpack-dev-middleware 来服务于 webpack 的包，
+
+XMR 的核心就使客户端从服务端拉取更新后的文件，准确的说是 chunk diff(chunk 需要更新的部分)，实际上 WDS 与浏览器之间维护了一个 websocket，当本地资源发生变化时，WDS 会向浏览器推送更新，并带上构建时的 hash，让客户端与上次资源进行对比。客户端对比出差异后会向 WDS 发起 AJAX 请求来获取更改内容（文件列表丶hash），这样客户端就可以再借助这些信息继续向  WDS 发起 `jsonp` 请求获取该 chunk 的增量更新
+
+后续的部分（拿到增量更新之后如何处理?哪些状态该保留？哪些又需要更新？）由 `HotModulePlugin来完成`，提供了相关API以供开发者对自身场景进行处理，想`react-hot-loader`和`vue-loader`都是借助这些API事项HMR。
+
+
+
+
+
+# 11. Webpack 优点和缺点?
+**优点：**
+
+- **专注于处理模块化的项目**，能做到开箱即用，一步到位
+- **通过plugin扩展，完整好用又不失灵活**
+- **使用场景不限于 Web 开发**
+- 社区庞大灵活，经常引入紧跟时代发展的新特性，能为大多数场景找到已有的开源拓展
+- 良好的开发体验
+- **按需加载：**代码中不需要的模块不被打进包里，或者按需加载。这是传统的流程构建工具，如 Gulp丶Grunt 等所无法实现的。
+
+**缺点**
+
+- **只能用于模块化开发的项目**
+- **兼容性问题：**webpack 一向是面对最新的标准，自身的特性需要 Polyfill 才能向下兼容，甚至有些特性最新浏览器还没有原生兼容，在做开发的时候需要注意。
+- **侵入性强：**使用 webpack的项目，某些高级语法特性需要依赖独特语法实现，在一定程度上属于面向 webpack 开发，需要一定的学习成本。
+- **传统技术开发的复杂项目不适用：**一些比如 jQuery丶requirejs丶seajs 等脚本模块化开发的复杂项目，由于打包需求不稳定，webpack 维护成本极高。
+
+
+
+
+
+
+# 12. bundle丶chunk丶moudle是什么？
+> webpack 会从配置的 entry 中递归开始找出所有依赖的模块
+- **bundle：** 是由 Webpack 打包出来的文件
+- **chunk：** 代码块，一个 chunk 是由多个模块组合而成，用于代码的合并和分割
+- **module：** 是开发中的单个模块，在 webpack 的世界，一切皆为模块，一个模块对应一个文件
+
+
+
+
+
+
+# 13. source map是什么？生产环境怎么用？
+**source map** 是将编译丶打包丶压缩后的代码映射回源代码的构建过程。因为打包压缩后的代码不具有良好的可读性，想要调试源码就需要 `source map`
+
+举例来说，如果压缩后处理过的生产环境中的代码出现 bug，调试的时候只能定位到压缩处理后的代码的位置，无法定位到开发环境中的源代码
+
+source map 就是为了解决上述代码定位的问题，简单理解就是构建了处理前的代码和处理后的代码之间的桥梁。主要方便开发人员的错误定位，这里的处理操作包括：
+- 压缩丶减少体积
+- 将多个文件合并成一个文件
+- 其他语言编译成 JavaScript，比如TS等
+
+多余打包后的 sourceMap，webpack 提供了多种类型
+
+<img src="https://s0.lgstatic.com/i/image/M00/43/5E/Ciqc1F87kyiAZvHdAAIGvohk2F4144.png">
+
+<img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/a897c8a036674f7c89d4428a7cfdbe6c~tplv-k3u1fbpfcp-zoom-1.image">
+
+其中，开发环境中使用：
+
+- eval：会把模块封装到 eval 里包裹起来执行，并且会在末尾追加 map 文件的地址。map 文件映射到转换后的代码（可执行的 JS 文件），而不是映射到原始代码（Vue 文件），所以不能正确的显示错误行数。
+
+​     <img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/be9e27294dbb420f8f6f407b2d0956e5~tplv-k3u1fbpfcp-zoom-1.image">
+
+- eval-source-map：和 eval 类似，为每个模块生成原始的 sourceMap，map 文件会以 dataURL 的形式添加到 JS 中（类似图片的 base64 形式）。原始的 sourceMap 可以正确的提示错误行数
+
+- eval-cheap-source-map：跟 eval-source-map 相同，唯一不同的增加了 cheap，cheap 是指忽略了列信息（绝大部分时候列信息对于错误提示没啥用，只需要提示行数就行）、
+- cheap-module-eval-source-map：与 eval-cheap-source-map 相同，但是包含了不同 laoder 模块之间的 sourceMap。例如借助 babel 编译 ES6，如果生成不包含 loader 的 sourmap，此时 debug 到的将是编译后的代码，而非原始代码。
+
+生产环境使用：
+
+- source-map：map 文件包含完整的原始代码，但是打包会很慢。打包后的 JS 最后一行是 map 文件注释的地址
+
+  <img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/80a80cd1a0a8438a8b9a40717ef27021~tplv-k3u1fbpfcp-zoom-1.image">
+
+- hidden-source-map：与 sourceMap 相同，也生成 map 文件，但是打包后的 JS 最后没有 map 文件地址的引用。浏览器不会主动去请求 map 文件，一般用于网站错误分析，需要让错误分析工具按名称匹配到 map 文件。
+
+- nosources-source-map：生成的 map 文件不包含源码，但是会正确提示错误的行数。另外项目的目录结构和文件名称会暴露在 source 面板
+
+  <img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/73fe423200844474a07c340ab64e68fd~tplv-k3u1fbpfcp-zoom-1.image">
+
+  不同的参数，生成的 sourceMap 不同，打包速度丶体积丶错误提示的效果也不同。而 vue-cli 帮我们预选了一种模式：
+
+  开发环境，配置文件位置：`node_modules\\@vue\cli-service\lib\config\dev.js`，第5行
+
+  <img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/827e1b42db5e467e8741502805a8c242~tplv-k3u1fbpfcp-zoom-1.image">
+
+​      生产环境，配置文件位置：`\node_modules\\@vue\cli-service\lib\config\prod.js`，第11行
+
+   <img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3c6fc514b458441685f54ee19acaf2a1~tplv-k3u1fbpfcp-zoom-1.image">
+
+另外：CSS 同样有 sourceMap，不过 vue-cli3 是默认关闭的：
+
+```js
+module.exports = {
+    css: {
+        sourceMap: false // 默认是false·
+    }
+}
+```
+
+**sourceMap 的处理**
+
+如果无特殊需求，生产环境下是需要关闭这个选项的，vue-cli3直接配置 productionSourceMap: fasle 即可。或者不关闭但是在测试环境迁移到正式环境时删除 map 文件。也可以通过服务器配置，特殊账号（调试专用）能访问到 map 文件，其他用户不行。
+
+如果需要控制台能正确提示报错的位置而不暴露源码，推荐用 nosource-source-map 模式，但是这个模式会暴露源码的目录文件与文件命名。一般测试环境用这个比较好，QA测试出来的问题能正确提示错误，即使运维忘了删除 sourceMap 文件，也不会暴露源码。
+
+```js
+// vue.config.js
+
+module.exports = {
+    configureWebpack: config => {
+        if(process.env.NODE_ENV === "production") { // 只修改生产环境配置
+            return {
+                devtool: "nosource-source-map"
+            }
+        }
+    }
+}
+```
+
+## EvalSourceMapDevToolPlugin 的使用
+
+这里重点看处理范围的参数，因为通常需要调试的是开发的业务代码，而非依赖的第三方模块部分。因此生成 source map 的时候如果可以排除第三方模块的部分而只生成业务代码的 source map，无疑能进一步提升构建的速度，例如示例：
+
+```js
+// webpack.config.js
+
+//devtool: "eval-souce-map",
+devtool: false,
+plugin: [
+    new webpack.EvalSourceMapDevToolPlugin({
+        exclude: /node_modules/,
+        module: true,
+        columns: false
+    })
+]
+```
+
+在上面的示例中，我们将 devtool 设为 false，而直接使用 EvalSourceMapDevToolPlugin，通过传入 module: true 和 column: false，达到和预设 eval-cheap-module-source-map 一样的质量，同时传入 exclude 参数，排除第三方依赖包的 souce map 生成。保存设定通过运行可以看到，在文件体积减少（尽量开发环境并不关注文件大小）的同时，再次构建的速度相比上面的表格的速度提升了将近一倍，达到了最快一级。
+
+<img src="https://s0.lgstatic.com/i/image/M00/42/9E/CgqCHl85_N2AUkcpAAEqvMKhgVQ549.png">
+
+## 开发环境下 source map 推荐的预设
+
+- 通常来说，开发环境首选哪一种预设取决于 source map 对于我们的帮助程度。
+- 如果对项目代码了如指掌，查看代码产物也可以无障碍了解对应源代码的部分，就可以关闭 devtool 或使用 eval 来获得最快的构建速度。
+- 反之如果在调试时，需要通过 source map 来快速定位到源码代码，则有限考虑 eval-cheap-module-source-map，它的质量与初次/再次构建速度都属于次级，以牺牲定位到列的功能换取更快的构建速度通常也是值得了。
+- 在其它情况下，根据对质量要求更高或是对速度要求更高的不同情况，可以分别考虑 eval-source-map 或 eval-cheap-source-map。
+
+建议 source map 在生产环境中不要打包上线
+
+或不要让普通用户看到 source map 
+
+
+
+
+
+
+# 14. 文件监听原理呢？
+**在发现源码发生变化时，自动重新构建出新的输出文件**
+
+**Webpack 开启监听模式，有两种方式：**
+
+- 启动 webpack 命令时，带上 --watch 参数
+- 在配置 webpack.config.js 中设置 watch: true
+
+**缺点：**每次需要手动刷新浏览器
+
+**原理：**轮训判断文件的最后编辑时间是否变化，如果某个文件发生了变化，并不会立刻告诉监听者，而是先缓存起来，等 `aggregateTimout` 后再执行
+
+```js
+module.export = {: 
+    // 默认false,也就是不开启
+    watch: true,
+    watchOptions: {
+        // 默认为空，不监听的文件或者文件夹，支持正则匹配
+        igonred: /node_modules/,
+        // 监听到变化发生后等300MS再去执行，默认300MS
+        aggregateTimout: 300,
+        // 判断文件是否发生变化是通过不停询问系统指定文件有没有变化实现的，默认每秒问1000次
+        pull: 1000
+
+    }
+}
+```
+
+
+
+
+
+
+# 15. 如何对 bundle 体积进行监控和分析？
+- VSCode 中有一个插件 `Import Cost`可以帮助外面对引入模块的大小进行实时检测
+
+- 还可以使用  `webpack-bundle-analyzer`  生成 `bundle` 的模块组成图，显示所占体积。
+- `bundlesize ` 工具包可以进行自动化资源体积监控
+
+
+
+
+
+
+# 16. 文件指纹是什么？怎么用？
+## 什么是文件指纹？
+
+- 打包后输出文件名的后缀
+- 通常用于版本管理
+- hash 一般是结合 CDN 缓存来使用，通过 webpack 构建之后，生成对应文件名自动带上的 MD5 值。如果内容改变的话，你们对应的文件哈希值也会改变，对应的 HTML 应用的 URL 也会改变，触发 CDN 服务器从源服务器拉取对应数据，进而更新本地缓存。
+
+## 文件指纹如何生成？
+
+- **Hash：** 和整个项目得到构架相关，webpack 打包阶段会生成Compiler丶Compilation。webpack启动那一次，会生成 Compiler(初始化一次)。但是每一次只要项目文件有修改，Compilation 都会发生变化。Complilation 变换就会影响 Hash 的变化，整个项目构建的 hash 值就会更改。如果 CSS/JS 都是使用 hash 作为文件指纹的话，那么某一个 JS 文件或者 CSS 发生变化，所有打包出来的 CSS/JS 指纹都会变化，不利于缓存。
+- **Chunkhash：** **采用 hash 计算的话，每一次构建后生成的哈希值不一样，即使文件内容压根没有变化。这样子是没办法实现缓存效果，** 我们需要另一种哈希值计算方式，即 chunkhash。chunkhash 和 hash 不一样，它根据不同的入口文件（Entry）进行依赖分析解析丶构建对应的chunk，生成对应的哈希值。我们在生产环境里把一些公共库和程序入口文件区分开，单独打包构建，接着我们采用 chunkhash 的方式生成哈希值，那么只要我们不改动公共库的代码，就可以保证其哈希值不会受影响。
+- **Contenthash：**根据文件内容来定义 hash，文件内容不变，则 contenthash 不变。某个页面既有 JS 资源，又有 CSS 资源。如果CSS资源也使用Chunkhash，就会导致 CSS 内容没有变化，发布上线的文件却发生了变化。因此，通常对 CSS 资源使用 Contenthash。这个时候可以使用 mini-css-extract-plugin 里的 contenthash 值，保证即使 CSS 文件所处的模块里就算其他文件内容改变，只要 CSS 文件内容不变，那么不会重复构建。
+
+## 文件指纹设置
+
+### JS 的文件指纹设置
+
+- 设置 output 的 filename，使用[chunkhash]，或[contenthash]
+```js
+module.exports = {
+    entry: {
+        app: './src/app.js',
+        search './src/search.js'
+    },
+    output: {
+        filename: '[name][chunkhash:8].js',
+        path: __dirname +'/dirs'
+    }
+}
+```
+
+### CSS的文件指纹设置
+
+- 设置 MiniCssExtractPlugin 的 filename，使用[contenthash]
+- MiniCssExtractPlugin：将 CSS 资源提取到一个独立的文件。
+```js
+module.exports = {
+    entry: {
+        app: './src/app.js,
+        search: './src/search.js'
+    },
+    output: 
+        filename: '[name[chunkhash:8].js',
+        path: __dirname + '/dist'
+    },
+    plugins: [
+        new MiniCssExtractPlugin({
+            filename: `[name][contenthash:8].css`
+        })
+    ]
+}
+```
+
+### 图片丶字体文件的文件指纹设置
+
+- 设置 file-loader（或url-loader）的name，使用[hash]
+
+注意：图片丶字体文件的 hash 和 css/js 资源的 hash 概念不一样，图片丶字体文件的 hash 是由内容决定的
+```js
+const path = require('path');
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__path, 'dist') 
+    },
+    module: {
+        rules: [
+            {
+                test: /\.(png|svg|jpg|gif)$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                        name: 'img[name][hash:8].[ext]'
+                    }
+                }]
+            }
+        ]
+    }
+}
+```
+
+### Webpack具体配置信息
+
+```js
+module.exports = {
+    entry: {
+        index: './test.test.js',
+        about: './test/about.js'
+    },
+    output: {
+        filename: '[name].[chunkhash:8].js'
+    },
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: [{loader: MiniCssExtractPlugin.loader}, 'css-loader']
+            },
+            {
+                test: /\.(png|jep?g|gif|svg)(\?.*)?$/,
+                loader: 'file-loader',
+                query: {
+                    // 设置图片资源的文件指纹 使用hash
+                    name: '[name].[ext]?[hash]',
+                    outputPath: 'static/img/',
+                    publicPath: './dist/static/img'
+                }
+            },
+            {
+                test: /\.(woff|woff2|eot|ttf|otf)$/, // 解析文体
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name]_[hash:8].[ext]' // 设置字体资源的文件指纹，使用hash
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    plugins: [
+        new CleanWebpackPlugin(),
+        new MiniCssExtractPlugin({
+            // 将CSS资源提取到一个独立的文件
+            // 设置CSS资源的文件指纹 用contenthash
+            filename: '[name].[contenthash:8].css',
+            chunkFilename: '[id].css'
+        })
+    ]
+}
+```
+**通常的文件缓存策略**
+- html: header头的 cache-control 会设置成 no-cache。也就是 html 文件不会走缓存
+- css/js/img 等静态资源：header 头的 cache-control 设置成强缓存，缓存时间通常是一年的样子。通常文件指纹控制缓存是否失效，文件指纹一变，请求就不走旧文件了
+
+
+
+
+
+# 17. 在实际工程中，配置文件上百行仍是常事，如何保证各个Loader按照预想方式工作？
+
+- 一般情况下，loader 的执行顺序为从右到左，从下往上
+- 可以通过 enforce 属性去改变执行顺序
+  - pre：前置 权重最高
+  - normal：不变 权重第二
+  - inline：行内权重第三
+  - post：后置 权重第四
+
+可以使用 `enforce` 强制执行`loader`的作用顺序，`pre` 代表在所有正常loader之前执行，`post`是所有loader之后执行。（inline官方不推荐使用）
+
+```js
+module: {
+    rules: [
+        {
+            test: /\.js$/,
+            use: {
+                loader: "loader3"
+            },
+            enforce: "pre"
+        },
+        {
+            test: /\.js$/,
+            use: {
+                loader: "loader2"
+            }
+        },
+        {
+            test: /\.js$/,
+            use: {
+                loader: "loader1"
+            }
+        }
+    ]
+}
+```
+
+上面的执行顺序就是 loader3 -> loader1 -> loader2
+
+
+
+
+
+# 18. 你刚才也提到了代码分割，那代码分割的本质是什么？有什么意义呢？
+## 代码分割的本质
+
+其实就是 `源代码直接上线` 和 `打包成唯一脚本main.bundle.js` 这两种极端方案之间的一种更适合实际场景的中间状态。
+
+**源码直接上线：**虽然过程可控，但是 http 请求多，性能开销大。
+**打包成唯一脚本：**服务器压力小，但是页面空白期长，用户体验不好
+
+在大点的 Web 应用来将，将所有的代码都放在一个文件中显然是不够有效的，特别是当你的某些代码块是在某些特殊的时候才会被使用到。webpack 有一个功能就是将你的代码分割成 chunks（语块），当代码运行到需要它们的时候再进行加密
+
+<img src="https://img-blog.csdnimg.cn/20190701172256928.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L20wXzM3OTM4OTEw,size_16,color_FFFFFF,t_70">
+
+## 使用的场景：
+
+- 抽离相同代码到一个共享块
+- 脚本懒加载，使得初始下载的代码更小
+
+webpack4 使用 SplitChunksPlugin 去重和分离代码
+
+```j
+const path = require("path");
+
+module.exports = {
+	mode: "development",
+	entry: {
+		index: "./src/index.js",
+		another: './src/another-module.js'
+	},
+	output: {
+		filename: '[name].bundle.js',
+		path: path.resolve(__dirname, "dist")
+	},
+	optimization: {
+		splitChunks: {
+			chunks: "all"
+		}
+	}
+}
+```
+
+## 对于代码分离很有帮助的 Plugin 和 loader。
+
+- mini-css-extract-plugin：用于将 CSS 从主程序中分离。
+- bund-loader：用于分离代码和延迟加载生成的 bundle
+- promise-loader：类似于 bundle-loader，但是使用了 promise API
+
+## 懒加载
+
+```diff
+webpack-demo
+|- package.json
+|- webpack.config.js
+|- /dist
+|- /src
+  |- index.js
++ |- print.js
+|- /node_modules
+```
+
+**src/print.js**
+
+```j
+console.log("The print.js module has loaded! See the network tab in dev tools...")
+
+export default() => {
+	console.log("Button Cliked: Here is some text!")
+}
+```
+
+**src/index.js**
+
+```js
+import _ from "lodash"
+
+function component() {
+    const element = document.createElement("div");
+    const button = document.createElement("button");
+    const br = document.createElement("br");
+    
+    button.innerHTML = "Click me and look at the console!";
+    element.innerHTML = _join(["Hello", "webpack"], ' ');
+    element.appendChild(br);
+    element.appendChild(button)
+    
+    button.onclick = e => import(/* webpackChunkName: "print"*/, './print').then(module => {
+        const print = module.default;
+        print();
+    });
+    return element;
+}
+document.body.appendChild(component());
+```
+
+**注意：当调用 ES6 模块的 Import() 方法引入模块时，必须指向模块的 .default 值，因为它才是 promsie 被处理后返回的实际的 module 对象。**
+
+
+
+
+
+# 19. 写过Loader吗？webpack loader 传入的是啥？
+
+**复用用法：当链式调用多个 loader 的时候，它们会以相反的的顺序执行。从右向左，从下向上。**
+
+**用法准则：**
+
+- 简单易用
+- 使用链式传递
+- 模块化的输出
+- 确保无状态
+- 使用 loader utilties
+- 记录 Loader 的依赖
+- 解析模块依赖关系
+- 提取通用代码
+- 避免绝对路径
+- 使用 peer dependencies
+
+**loader 只能传入一个参数，这个参数是一个包含文件资源文件内容地字符串**
+
+
+
+
+
+# 20. 写过 Plugin 吗？
+**webpack 在运行的生命周期会广播出许多事件，Plugin 可以监听到这些事件，在特定的阶段钩入想要添加的自定义功能。webpack 的 Tapable 事件流机制保证了插件的有序性，是的整个系统拓展性良好。**
+
+**插件开发中最重要的对象是 `compiler` 和 `compilation` 对象**
+
+- `compiler` 对象
+  - 代表了完整的 webpack 环境配置，在初始化 compiler 对象之后，通过调用插件实例的 `apply` 方法，作为其参数传入。这个对象在启动 webpack 时被一次性建立，并包含了 webpack 环境 的所有的配置信息，包括options，loader 和 plugin。当在 webpack 环境中应用一个插件时，插件将受到此compiler对象的引用。
+  - 可以使用它访问 webpack 的主环境
+- `compilation` 对象
+  - 会作为  `plugin` 内置事件回调函数的参数，一个 `compilation` 对象包含了当前模块丶编译生成资源丶变化的文件以及被跟踪依赖的状态信息。当webpack以开放模式运行时，每当检测到一个文件变化，一次性的 `compilation` 将被创建。`compilation` 对象也提供了很多事件回调供插件做拓展。
+  - 通过`compilation`也能读取到`compiler`对象
+
+**为了把开发环境的配置和生产环境的配置区分开来，我们提取公共配置到到一个配置文件，然后把dev和prod的配置分离。我们dev环境会用到webpack-dev-server，但 prod 环境就不需要了**
+
+
+
+
+
+# 21. 提高 Webpack 构建速度（打包时间长）
+
+## 用 speed-measure-webpack-plugin 测量你的 webpack 构建期间各个阶段花费的时间
+
+速度分析插件作用：
+
+- 分析整个打包耗时
+- 每个插件 和 babel 的耗时情况
+
+```js
+const SpeedMeasureWebpackPlugin = require("speed-measure-webpack-plugin");
+
+const smp = new SpeedMeasureWebpackPlugin();
+const webpackConfig = smp.wrap({
+    plugins: [
+        new MyPlugin(),
+        new MyOtherplugin
+    ]
+})
+```
+
+## 优化搜索时间（缩小文件搜索范围，减少不必要的编译工作）
+
+开始打包，我们需要获取所有的依赖项，搜索所有的依赖项，这需要占用一定的时间，即搜索时间。
+
+### 优化 loader 配置
+
+使用 loader 时可以通过 test include exclude 三个配置项来命中 loader 要应用规则的文件
+
+```js
+module.exports = {
+  module: {
+      noParse: /jyqeury|lodash/, // 用于配置指定模块的内容不需要进行解析，对于一些不需要解析依赖的第三方类库等，可以通过配置这个字段以提高整体的构建速度
+      rules: [{
+          test: /\.js$/,
+          use: ['babel-loader?cacheDirectory'], // 开启转换结果缓存,
+          include: path.resolve(__dirname, 'src'), // 只对src目录中文件采用 babel-loader
+          exclude: path.resolve(__dirname, './node_modules'), // 排除node_modules目录下的文件
+      }],
+  }
+}
+```
+
+### 优化 resolve.module 配置
+
+- `resolve.modules` 用于配置 `webpack` 去哪些目录下寻找第三方模块，默认是`['node_modules']`，但是它会先去当前目录的 `./node_modules` 寻找，没有的话再去 `../node_modules`，最后到根目录
+- 所以当安装的第三方模块都放在项目根目录时，就没有必要按默认的一层一层的查找，直接
+
+```js
+module.exports = {
+  resolve: {
+      modules: [path.resolve(__dirname, 'src'), 'node_modules']
+  }
+}
+```
+
+### 优化 resolve.alias 配置
+
+resolve.alias 配置项通过别名来把原导入路径映射成一个新的导入路径，减少耗时的递归解析操作。
+
+### 优化 resolve.extensions 配置
+
+- 在导入没带文件后缀的路径，webpack会自动带上后缀去尝试询问文件是否存在，而 `resolve,extensions` 用于配置尝试后缀列表；默认为 `extensions: ['js', 'json']`;
+- 及当遇到 require('./data') 时 webpack 会先尝试寻找 data.js，没有再去找 data.json；如果列表越长，或者正确的后缀越往后，尝试的次数就会越多  
+- 所以在配置时为提升构建优化需遵守：
+  - 频率出现高的文件后缀优先放在前面
+  - 列表尽可能的小
+  - 书写导入语句的时，尽可能写上后缀名
+- 因为项目用的 jsx 较多， 所以配置 `extension: [".jsx", ".js]`
+
+### 优化 resolve.mainFields 配置
+
+有一些第三方模块会针对不同环境提供几分代码。例如分别提供采用 ES5 和 ES6 的 2 份代码，这 2 份代码的位置写在 package.json 文件里，如下：
+
+```js
+{
+    "jsnext:main": "es/index.js", // 采用 ES6 语法的代码入口文件
+    "main": "lib/index.ks" // 采用 ES5 语法的代码入口文件
+}
+```
+
+webpack 会根据 mainFields 的配置去决定优先采用那份代码，mainFields 默认如下：
+
+```js
+mainFields: ["browser", "main"]
+```
+
+webpack 会按照数组里的顺序去 package.json 文件里寻找，只会使用找到的第一个
+
+假如你想优先采用 ES6 的那份代码，可以这样配置：
+
+```js
+mainFields: ["jsnext:main", "brower", "main"]
+```
+
+### 优化 module.noParse 配置
+
+注：使用 `noParse` 进行忽略的模块文件不能使用 import丶require丶define 等导入机制  
+
+```js
+module.exports = {
+  module: {
+      noParse: /jyqeury|lodash/, // 用于配置指定模块的内容不需要进行解析，对于一些不需要解析依赖的第三方类库等，可以通过配置这个字段以提高整体的构建速度
+  }
+}
+```
+
+## 优化解析时间
+
+**解析所有的模块（解析成浏览器可运行的代码），webpack 根据我们配置的 loader 解析相应的文件。日常开发中我们需要使用 loader 对 js丶 css丶图片丶文字等文件转换，并且转换的文件数据量也是非常大。由于 JS 单线程的特性使得这些转换操作不能并发处理文件，而是需要一个个文件进行处理。**
+
+### HappyPack 并行构建优化
+
+**核心原理：将 `webpack` 中最耗时的 `loader` 文件转换操作任务，分解到多个进程中并行处理，从而减少构建时间**
+
+接入HappyPack
+
+- 安装： `npm i -D happypack`
+
+- 注意当你的项目不是很复杂时，不需要配置 happypack，因为进程的分配和管理也需要时间，并不能有效提升构建速度，甚至会变慢。
+
+- 配置：
+
+```js
+const HappyPack = require('happypack');
+const happyThreadPool = HappyPack.ThreadPool({size: 5}); // 构建共享进程池 包括5个进程
+
+plugins: [
+     // happypack并行处理
+    new HappyPack({
+        // 用id来标识 happypack处理哪类文件
+        id: 'happybabel',
+        loaders: [{
+            loader: 'babel-loader?cacheDirectory=true'
+        }],
+        // 共享进程池
+        threadPool: happyThreadPool,
+        // 允许happyPack输出日志
+        verbose: true
+    }),
+    // happypack并行处理
+    new HappyPack({
+        // 用id来标识 happypack处理哪类文件
+        id: 'css',
+        loaders: ['css-loader', 'postcss-loader', 'sass-loader'],
+        // 共享进程池
+        threadPool: happyThreadPool,
+        // 允许happyPack输出日志
+        verbose: true
+    }),
+],
+modules: {
+    rules: [
+        // 解析babel
+        {
+            test: /\.js$/,
+            // loader: 'babel-loader',
+            use: ['cache-loader', 'happypack/loader?id=happybabel'],
+            include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')],
+            exclude: path.resolve(__dirname,' ./node_modules'),//排除node_modules目录下的文件
+        },
+        // 解析less
+        {
+            test: /\.less$/,
+            // loader: "style-loader!css-loader!less-loader",
+            use: ["cache-loader", "happypack/loader?id=css"],
+            exclude: path.resolve(__dirname,' ./node_modules'),//排除node_modules目录下的文件
+        },
+    ]
+}
+```
+
+### thread-loader（webpack4 官方推荐）
+
+把这个 loader 放置再其它 loader 之前，放置在这个 loader 之后的 loader 就会在一个单独的 worker【worker pool】池里运行，一个 worker 就是 NodeJS 进程【node.js process】，每个单独进程处理时间上限为 600ms，各个进程的数据交换也会限制在这个时间内。
+
+thread-loader 使用起来也非常简单，只要把 thread-loader 放置在其它 loader 之前，那 thread-loader 之后的 loader 就会在一个单独的 worker 池（worker pool ）中运行。
+
+注意：thread-loader 放在了 style-loader 之后，这是因为 thread-loader 后的 loader 无法存取文件也无法获取 webpack 的选项配置
+
+官方上说每个 worker 大概都要花费 600ms，所以官方为了防止启动 worker 时的高延迟，提供了对 worker 池的优化：预热
+
+注意：请仅在耗时的 loader 的上使用
+
+```js
+const threadLoader = require("thread-loader");
+
+const jsWorkerPool = {
+    // 产生的 worker 的数量，默认是(cpu 核心数 - 1)
+    // 当 require('os').cpus() 是 undefined时，则为 1
+    workers: 2,
+    // 闲置时定时删除 worker 进程
+    // 默认为 500 ms
+    // 可以设置为无穷大，这样在监视模式（--watch）下可以保持 worker 持续存在
+    poolTimeout: 2000
+}
+
+const cssWorkerPool = {
+    // 一个 worker 进程中并行执行工作的数量
+    // 默认为20
+    workerParallelJobs: 2,
+    poolTimeout: 2000
+}
+
+// 预热
+threadLoader.warmup(jsWorkerPool, ["babel-loader"]);
+threadLoader.warmup(cssWorkerPool, ["css-loader", "postcss-loader"])
+
+module.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                // 创建一个 js worker 池
+                use: [
+                    "thread-loader",
+                    "babel-loader"
+                ]
+            }，
+            {
+            	test: /\.s?css$/,
+                exclude: /node_modules/,
+            	// 创建一个 CSS worker 池
+            	use: [
+            		"style-loader",
+            		"thread-loader",
+               		 {
+                        loader: "css-loader",
+                        options: {
+                            modules: true,
+                            localIdentName: "[name]_[local]--[hash:base64:5]",
+                            importLoaders: 1
+                        }
+                    },
+    				"postcss-loader"
+        		]
+            }
+        ]
+    }
+}
+```
+
+## 优化压缩时间
+
+将所有解析完成的代码，打包到一个文件中，为了使浏览器加载的包更新（减少白屏时间），所以 webpack 会对代码进行优化。
+
+JS 压缩是发布编译的最后阶段，通常 webpack 需要卡好一会，这是因为压缩 JS 需要先将代码解析成 AST 语法树，然后需要根据复杂的规则去分析和处理 AST，最后将 AST 还原成 JS，这个过程涉及到大量计算，因此比较耗时，打包容易卡住。
+
+### webpack 3
+
+#### UglifyJSPlugin
+
+webpack3 启动打包时加上 --optimize-minimize，这样 webpack 会默认自动为你注入一个带有默认配置的 UglifyJSPlugin
+
+或：
+
+```js
+module.exports = {
+    optimization: {
+        minimize: true
+    }
+}
+```
+
+#### ParalleUglifyPlugin 
+
+压缩 JavaScript 代码需要先把代码解析成用 Object 抽象表示的 AST 语法树，再去应用各种规则分析和处理 AST，导致这个过程计算量巨大，耗时非常多。但 UglifyJsPlugin 是单线程，所以我们可以使用 ParallelUglifyPlugin
+
+ParalleUglifyPlugin 插件实现了多进程压缩，ParalleUglifyPlugin 会开启多个子进程，把对多个文件的压缩工作分配给多个子进程去完成，每个子进程其实还是通过 UglifyJs 去压缩代码，但是变成了并行执行。所以 ParalleUglifyPlugin 能更快的完成对多个文件的压缩工作。
+
+```js\
+new ParallelUglifyPlugin({
+    cacheDir: '.cache/',   // 设置缓存路径，不改动的调用缓存，第二次及后面build时提速
+    uglifyJS: {
+        output: {
+        // 是否输出可读性较好的代码，即可保留空格和制表符，默认为输出，为了达到更好的压缩效果，可以设置为false
+        beautify: false,
+        // 是否保留代码中的注释，默认为保留，为了达到更好的压缩效果，可以设置为false
+        comments: false
+        },
+        // 是否在UglifyJS删除没有用到的代码时输出警告信息，默认为输出，可以设置为false关闭这些作用不大的警告
+        warning: false,
+    }
+})
+```
+
+### webpack4
+
+webpack4 中 webpack.optimize.UglifyJsPlugin 已被废弃
+
+也不推荐使用 ParallelUglifyPlugin，项目基本处于没人维护的阶段，issue 没人处理，pr 没人合并。
+
+webpack4 默认内置使用 terser-webpack-plugin 插件压缩优化代码，而该插件使用 terser 来缩小代码。
+
+####  terser-webpack-plugin
+
+##### terser 是什么？
+
+所谓 terser，官方给出的定义是：
+
+> 用于 ES6 + 的 JavaScript 解析器丶mangler/compressor （压缩器）工具包
+
+为什么 webpack 选择 terser？
+
+> 不再维护 uglify-es，并且 uglify-js 不支持 ES6+
+>
+> terser 是 uglify-es 的一个分支，主要保留了与 uglify-es 和 uglify-js@3 的 API 和 CLI 兼容性
+
+##### terser 开启多进程
+
+使用多进程并行运行提高构建速度。并行运行的默认数量为 os.cpus().length - 1
+
+```js
+module.exports = {
+    optimization: {
+        minimizer: [
+            new TerserPlugin({
+                parallel: true
+            })
+        ]
+    }
+}
+```
+
+可以显著加快构建速度，因此强烈推荐开启多进程
+
+## 优化二次打包时间 => 合理使用缓存（缩短连续构建时间，增加初始构建时间）
+
+当更改项目中的一个小小的文件时候，我们需要重新打包，所有的文件都必须要重新打包，需要花费同初次相同的时间，但项目中大部分文件都没有变更，尤其是第三方库。
+
+### cache-loader	
+
+cache-loader 和 thread-loader 一样，使用起来也很简单，仅仅需要在一些开销较大的 loader 之前添加此 loader，以将结果缓存在磁盘里，显著提高二次构建速度。
+
+注意：保存和读取这些缓存文件会有一些时间开销，所以请只对性能开销较大的 loader 所以此 cache-loader
+
+```js
+{
+    test: /\.js$/,
+    use: ['cache-loader', 'happypack/loader?id=happybabel'],
+    include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')],
+    exclude: path.resolve(__dirname,' ./node_modules'),//排除node_modules目录下的文件
+}
+```
+
+### HarSourceWebpackPlugin 或 babel-loader 的 cacheDirectory 标志
+
+如果文件没有被改动则使用缓存
+
+```js
+{
+    test: /\.js$/,
+    use: [{
+        // 如果文件没有被改动则使用缓存
+        loader: 'babel-loader?cacheDirectory'
+    }]
+}
+```
+
+## 提升基础环境版本
+
+在项目中，如果发现脚手架打包缓慢，体积又臭又大，那么升级技术环境是提升的最快方式，比如 node 环境，比如升级脚手架版本，效果会有显著提升，而且是最廉价的优化方式
+
+
+
+
+
+# 22. Webpack 优化解决项目体积过大
+
+## 使用 webpack-bundle-analyzer 分析体积
+
+构建完成后会在 8888 端口展开大小
+
+可以分析那些问题？
+
+- 依赖的第三方模块文件大小
+- 业务里面的组件代码大小
+
+```js
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+
+module.exports = {
+    plugins: [
+        new BundleAnalyzerPlugin()
+    ]
+}
+```
+
+## 去掉不必要的插件
+
+刚开始用 webpack 的时候，开发环境和生产环境用的是同一个 webpack 配置文件，导致生产环境打包的 JS 文件包含了一大堆没必要的插件，比如 HotModuleReplacementPlugin丶NoErrorsPlugin...  这时候不管用什么优化方式，都没多大效果。所以，如果你打包后的文件非常大的话，先检查下是不是包含了这些插件。
+
+## 去除 devtool 选项
+
+很多教程都会叫你在 webpack.config,js 中设置 devtool 选项，比如 devtool: "eval-source-map"。但是这只适用于开发环境，这会造成打包的文件往往有几M，所以在生产环境必须去掉此配置。
+
+## 分离 CSS
+
+因为通过 webpack 打包后的 CSS 代码是放在 JS 文件中的，这样会使得 JS 文件的体积变大，而分离 CSS 代码带单独的 CSS 文件中，可以和 JS 并行加载，提高网页加载效率。
+
+使用 mini-css-extract-plugin 分离出 CSS
+
+```bash
+npm install --save-dev mini-css-extract-plugin
+```
+
+```js
+const MiniCssExtractPlugin = require("min-css-extract-plugin");
+
+module.exports = {
+    plugins: [new MiniCssExtractPlugin()],
+    module: {
+        rules: [
+           {
+               test: /\.css$/i,
+               use: [MiniCssExtractPlugin.loader, "css-loader"]
+           }
+        ]
+    }
+}
+```
+
+## 使用 wbpack.optimize.UglifyJsPlugin 插件压缩混淆 JS 代码
+
+```js
+plugins: [
+    webpack.optimize.UglifyJsPlugin({
+        warning: false,
+        compress: {
+            join_vars: true,
+            warning: fasle
+        },
+        taplevel: fasle,
+        ie8: false
+    })
+]
+```
+
+## 去除相同的依赖
+
+当多个 bundle 共享一些相同的依赖，CommonsChunkPlugin 有助于提取这些依赖到共享的 bundle 中，避免重复打包。
+
+```js
+var CommonsChunkPlugin = require("webpack/lib/optimize/CommonChunksPluigin");
+
+module.exports = {
+    entry: {
+        main: "./main.js"
+    },
+    ouput: {
+        path: __dirname + "/dist",
+        filename: "[name].js"
+    },
+    plugins: [
+        new ComonsChunksPlugin({
+            name: "chunk",
+            filename: "chunk.js"
+        })
+    ]
+}
+```
+
+## CDN引入不想被打包第三方库
+
+webpack 默认会将使用的模块全部打包成本地文件，除了使用代码拆分优化打包，也可以使用 CDN，减少打包内容，享受 CDN 缓存的优势。
+
+webpack 的 externals 配置可以将指定的第三方库移除打包清单，减少打包体积，但又不影响使用模块化的方式导入第三方库，例如 import
+
+例如使用 CDN 引入 element-ui，依然使用 import ElementUI from "element-ui"导入
+
+CDN 引入 element-ui
+
+```js
+// vue.config.js
+
+module.exports = {
+    chainWebpack: webpackConfig => {
+       webpackConfig.externals({
+           "element-ui": "ELEMENT"
+       })
+    }
+}
+```
+
+在模板文件 /public/index.html 中引入 CDN 引入：
+
+```js
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+    <!-- CDN -->
+    <script src="https://unpkg.com/element-ui@2.14.1/lib/index.js"></script>
+  </body>
+</html>
+```
+
+Vue 注册 ElementUI
+
+```j
+// /src/main.js
+import Vue from 'vue'
+import App from './App.vue'
+import ElementUI from 'element-ui'
+
+Vue.use(ElementUI)
+
+Vue.config.productionTip = false
+
+new Vue({
+  render: h => h(App),
+}).$mount('#app')
+```
+
+**npm run build 打包**
+
+<img src="https://img-blog.csdnimg.cn/20201202110806968.png#pic_center">
+
+<img src="https://img-blog.csdnimg.cn/20201202110813145.png#pic_center">
+
+### CDN 挂了怎么办
+
+最好的办法是自己部署 CDN，或者购买 CDN 服务。
+
+如果使用第三方 CDN，可以在项目本地存放一份文件，当页面加载时，判断 CDN 引入创建的全局变量是否存在，如果不存在则加载本地文件。
+
+```js
+<script src="https://unpkg.com/2element-ui@2.14.1/lib/index.js"></script>
+if(typeof ELEMENT === "undefined") {
+    // 注意一定要用 document.write，因为它会阻塞后面的代码
+    document.write("<script src="./js/element-ui.js"></script>")
+}
+```
+
+### 是否属于 CDN
+
+CDN 引入的代码是没有经过 tree-shaking 优化的
+
+如果仅仅使用了第三方库的一部分功能，CDN 依然会全量引入所有内容，反而浪费。
+
+例如，只是使用了 element-ui 的两个组件，那经过 webpack tree-shaking 优化的代码可能会更小
+
+## 图片资源压缩
+
+在我们打包时候，如果遇见小型图片，我们直接转换成base64位格式，减少http请求就能达到前端性能优化的目的
+
+```js
+{
+  test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+  loader: 'url-loader',
+  options: {
+      // 小于 5KB 的图片使用 base64 格式产出
+      // 否则使用file-loader的形式产出 url 格式
+      limit: 5 * 1024,
+      // 打包到img文件夹下
+      name: utils.assetsPath('img/[name].[hash:7].[ext]'),
+  },
+  exclude: path.resolve(__dirname,' ./node_modules'),//排除node_modules目录下的文件
+}
+```
+
+## Scope Hoisting
+
+Scope Hoisting 它可以让 webpack 打包出来的代码文件更小，运行更快，它可以被称为作用域提升。
+
+是在 webpack3 中提出的，当然 webpack4 也是支持的
+
+要使用 Scope Hosting 功能首先我们需要的是我们 JS 文件都属于 ES6 的语法来编写的，否则它是不会生效的。
+
+使用 Scope Hoisting 是 webpack 内置的功能，只要配置一个插件即可
+
+```js
+module.exports = {
+    plugins: [
+        // 开启 scope hoisting 功能
+        new webpack.optimize.ModuleConcatenationPlugin()
+    ]
+}
+```
+
+使用 Scope Hoisting 的优点如下：
+
+- 代码体积会变小，因为函数声明语句会产生大量代码，但是第二个没有函数声明
+- 代码在运行时因为创建的函数作用域减少了，所以内存开销变小了
+
+
+
+
+
+
+# 23. 如何在 Vue 项目中实现按需加载？
+### Vue UI组件库的按需加载
+
+为了快速开发前端项目，经常会引入现成的 UI 组件库如 ElementUI丶iWiew 等，但是他们的体积和他们所提供的功能一样，是很庞大的。而通常情况下，我们仅仅需要少量的几个组件就足够了，但是我们却将庞大的组件库打包到我们的源码中，造成不必要的开销。
+
+不过很多组件库已经提供了现成的解决方案，如 Element 出品的 `babel-plugin-component` 和AntDesign出品的 `babel-plugin-import` 安装上插件后，在 .babelrc 配置中或者 babel-loader 的参数中进行设置，即可实现组件按需加载了。
+
+**首先，安装 babel-plugin-component：**
+
+```js
+npm install babel-plugin-component -D
+```
+
+**然后，将 .babelrc 修改为：**
+
+```js
+{
+  	...
+  
+    "plugins": [
+        [
+            "component",
+            {
+                "libraryName": "element-ui",
+                "styleLibraryName": "theme-chalk"
+            }
+        ]
+    ]
+}
+```
+
+**接下来，如果你只希望引入部分组件，比如 Button 和 Select，那么需要在 main.js 中写入以下内容：**
+
+```js
+import Vue from 'vue'
+import { Button, Select } from 'element-ui'
+import App from './App.vue'
+
+Vue.component(Button.name, Button)
+Vue.component(Select.name, Select)
+/* 或写为
+ * Vue.use(Button)
+ * Vue.use(Select)
+ */
+
+new Vue({
+  el: '#app',
+  render: h => h(App)
+})
+```
+
+### 单页面应用的按需加载
+
+现在很多前端项目都是通过单页面应用的方式开发的，但是随着务的不断扩展，会面临一个严峻的问题--首次加载的代码的代码量会越来越多，影响用户的体验。
+
+通过 import() 语句来控制加载时机，webpack 内置了对于 import() 的解析，会将 import() 中引入的模块作为一个新的入口在生成一个 chunk。当代码执行到import() 语句时，会去加载 Chunk 对应生成的文件。import() 会返回一个 Promise 对象，所以为了让浏览器支持，需要事先注入 Promise polyfill。
+
+
+
+
+
+
+# 24. Babel原理
+**Babel 大概分为三大部分：**
+- 解析：将代码（其实就是字符串）转换成AST（抽象语法树）
+- 转换：访问AST的节点进行变换操作生成新的AST
+- 生成：以新的AST为基础生成代码
+
+**文本 --> AST的过程有两个关键步骤**
+- 词法分析：将代码（字符串）分割成token流，即语法单元组成的数组
+- 语法分析：分析token流（上面生成的数组）并生成AST
+
+
+**(如何转换代码？)babel做一个react转小程序的转换器。babel工作流程是这样的**
+- babel将react代码解析为抽象语法树
+- 开发者利用babel插件定义转换规则，根据原本的抽象语法树生成一个符合小程序规则的新抽象语法树
+- babel则根据新的抽象语法树生成代码，此时的代码就是符合小程序规则的新代码
+
+
+**如何生成代码**
+- 生成代码这一步实际上是根据我们转换成的抽象语法树来生成新的代码，我们会实现一个函数，它接受一个对象（ast），通过递归生成最终的代码。
+
+https://juejin.cn/post/6844903849442934798#heading-0
+
+
+
+
+
+
+# 24. Tree-Shaking
+
+**具体来说，在 Webpack 项目中，有一个入口文件，相当于树的主干，入口文件有很多依赖的模块，相当于树枝。实际情况中，虽然依赖了某个模块，但其实只使用其中的某些功能。通过 tree-shaking，将没有使用的模块摇掉，这样达到删除无用代码的目的。**
+
+Tree-shaking 的本质是消除无用的 JS 代码，无用代码消除在广泛存在于传统的编程语言编译器中，编译器可以判断某些代码根本不影响删除，然后消除这些代码，这个称之为DCE。
+
+Tree-shaking 是 DCE 的一种新的实现，JavaScript 同传统的编程语言不同的是，JavaScript 绝大多数情况需要通过网络进行加载，然后执行，加载的文件大小越小，整体执行时间更短，所以去除无用代码减少文件体积，对JavaScript来说更有意义。
+
+Tree-shaking 和传统的 DEC 的方法又不太一样，传统的 DCE 消灭不可能执行的代码，而 Tree-shaking 更关注消除没有用到的代码。
+
+**DCE特征（由uglify执行）：**
+
+- 代码不会被执行，不可到达
+- 代码执行的结果不会被用到
+- 代码只会影响死变量（只写不读）
+
+tree-shaking 更关注于无用模块的消除，消除哪些引用了但并没有使用的模块
+tree-shaking 的消除原理是依赖 ES6 的模块特性
+
+**ES6模块的特点：**
+
+- 只能作为模块顶层的语句出现
+- import的模块名只能是字符串常量
+- import binding 是 immutable
+
+ES6模块依赖关系是确定的，和运行时的状态无关，可以进行可靠的静态分析，这就是 tree-shaking 的基础
+
+所谓静态分析就是不执行代码，从字面量上对代码进行分析，ES6之前的模块化，比如我们可以动态 require 一个模块，只有执行后才知道引用的什么模块，这个就不能通过静态分析去做优化了。
+
+这是ES6 modles在设计时的一个重要考量，也是为什么没有直接采用 CommonJS，正是基于这个基础上，才使得 tree-shaking 成为可能，这也是为什么 rollup 和 webpack2 都要用 ES6 module synatax 才能 tree-shaking
+
+**劣势分析：**
+
+- rollup 只处理函数和顶层的import/export变量，不能把没有用到的类的方法消除掉
+- JavaScript 动态语言的特性使得静态分析比较困难
+- 如果静态分析的时候是删除里面的 run 或者 jump，程序运行时就可能报错，那就本末倒置了，我们的目的是优化，肯定不能影响执行。
+- Rollup 只处理 函数 和 import/export变量
+- JavaScript 动态语言的特性使得分析比较困难
+- Side Effect广泛存在
+- Tree-shaking 效果不佳 对顶层纯函数
+
+closure compiler怎么样
+- 侵入式的写法不行 是Java写的 和我们基于node的各种构建库不可能兼容
+- Closure Compiler使用起来也比较麻烦，所以效果很赞，但比较难以运用到项目中，迁移成本较大
+
+三大工具对于无用代码，无用模块的消除，都是有限的，有条件的。closure compiler是最好的，但是与我们日常基于node的开发流是很难兼容的。
+
+### tree-shaking 实战
+
+#### 对组件库引用的优化
+
+- **使用 import { Button } from "element-ui",具有较好的性能，bundle 体积减少 80%**
+
+- **babel-plugin-import-fix 缩小引用范围**
+
+  - 这个插件的原理就是提供核心babylon 将 ES6 代码转换成 AST 抽象语法树，然后插件遍历语法树找出类似 import (Button) from "element-ui"这样的语句，进行转换，最后重新生成代码。
+
+  - 默认支持`antd`丶`element`丶`element-ui`丶`wui`丶`xcui`丶`d3`，只需要在babelrc配置插件本身就可以
+
+  ```js
+  {
+      "presets": [
+          ["es2015", { "modules": false }], "react"
+      ],
+      "plugins": ["import-fix"]
+  }
+  ```
+
+  - 其实想把所有常用的库都默认支持的，都是很多常用的库却不支持缩小引用范围。因为没有独立输出各个子模块，不能把引用修改为单个子模块的引用。
+
+### CSS Tree-shaking
+
+####  webpack-css-treeshaking-plugin，对 CSS 进行 tree-shaking
+
+整体思路是这样的，遍历所有的 CSS 文件中的 selector 选择器，然后去所有的 JS 代码中匹配，如果选择器没有在代码中出现过，则认为该选择器是无用代码。
+
+
+
+PostCSS 提供了一个解析器，它能够将 CSS 解析成 AST 抽象语法树。然后我们能写各种插件，对抽象语法树做处理，最终生成新的 CSS 文件，以达到对 CSS 进行精确修改的目的。
+
+<img src="https://user-gold-cdn.xitu.io/2018/1/4/160bfde28789c23f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+
+整体又是一个 webpack 插件，架构图如下：
+
+<img src="https://user-gold-cdn.xitu.io/2018/1/4/160bfde288369a85?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+
+主要流程如下：
+
+- 插件监听 webpack 编译完成事件，webpack 编译完成之后，从 compilation 中找出所有所有的 CSS 文件和 JS 文件
+
+  ```js
+  apply(compiler) {
+      compiler.plugin("after-emit", (comppilation, callback) => {
+          
+          let styleFile = Object.keys(compilation.assets.filter(asset => {
+             return /\.css$/.test(asset);
+          })
+          
+          let jsFile = Object.keysa(compilation.assets).filter(asset => {
+              return /.(js|jsx)$/.test(asset);
+          })
+          
+          ...
+      })
+  }
+  ```
+
+- 将所有的 CSS 文件送至 postCss 处理，找出无用代码
+
+  ```js
+  let tasks = [];
+  styleFiles.forEach((filename) => {
+      const source = compilation.assets[filename].source();
+      let listOpts = {
+          include: "",
+          source: jsContents, // 传入全部JS文件 
+          opts: this.options // 插件配置选项
+      }
+      tasks.push(postcss(treeShakingPlugin(listOpts).process(source).then(result => {
+          let css = result.toString(); // postCss 处理后的 CSS AST
+          // 替换 webpack 的编译产物 compilation
+          compilation.assets[filename] = {
+              source: () => css.
+              size: () => css.length
+          }
+          return result;  
+      }))
+  })
+  ```
+
+- postCss 遍历丶匹配丶删除过程
+
+  ```js
+  module.exports = postcss.plugin('list-selector', function(options) {
+      cssRoot.walkRules(function(rule) {
+          if(rule.parent.type === "atrule" && /keyframes/.test(rule.parent.name)) {
+              return;
+          }
+          
+          checkRule(rule).then(result => {
+              if(result.selectors.length === 0) {
+                  // 选择器全部被删除·
+                  let log = '✂[' + rule.selecto ']' shaked, [1]';
+                  if(config.remove) {
+                      rule.remove()
+                  }
+              }else {
+                  // 选择器被部分删除
+                  let shaked = rule.selectors.filter(item => {
+                      return result.selectors.indexOf(item) === -1;
+                  })
+                  if(shaked && shaked.length > 0) {
+                      let log = '✂[' + rule.selecto ']' shaked, [2]';
+                      console.log(log);
+                  }
+                  if(config.remove) {
+                      // 修改抽象语法树
+                      rule.selectors = rule.selectors;
+                  }
+              }
+          })
+      })
+  })
+  ```
+
+- checkRule 处理每一个规则核心代码
+
+  ```js
+  let checkRule = (rule) => {
+      return new Promise(resolve => {
+          ...
+          let secs = rule.selectors.filter(function(selector) {
+              let result = true;
+              let processor = parser(function (selector) {
+                  for(let i = 0, len = selector.node.length; i < len; i++) {
+                      let node = selectors.nodes[i];
+                      if(_.includes(["comment", "combinator", "pseudo"], node.type)) {
+                          continue;
+                      }
+                      for(let j = 0; len2 = node.nodes.length; j < len2; j++) {
+                          let n = node.nodes[j];
+                          if(!nodeCache[n.value]) {
+                              switch(n.type) {
+                                  case "tag":
+                                      break;
+                                  case "id":
+                                  case "class":
+                                      if(!classInJs(n.value)) {
+                                          notCache[n.value] = true;
+                                          result = false;
+                                          break;
+                                      }
+                                      break;
+                                  default: 
+                                      break;
+                              }
+                          }else {
+                              result = false;
+                              break;
+                          }
+                      }
+                  }
+              })
+          })
+      })
+  }
+  ```
+
+  可以看到其实我只处理 id 选择器 和 clsss 选择器，id 和 class相对来说副作用小，引起样式异常的可能性相对较小。
+
+  判断 CSS 是否在 JS 中出现过，是使用正则匹配
+
+  其实，后续还可以继续优化，比如对 tag 类的选择器，可以配置是否在 html 丶jsx 丶template中出现过，如果出现过，没有出现过也可以认为是无用代码。
+
+  当然，插件能正常工作还是有一些前提和约束。我们可以在代码中动态修改 CSS，比如在 React 和 Vue中，可以这么写
+
+  <img src="https://user-gold-cdn.xitu.io/2018/1/4/160bfde28dd70e3b?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+
+  
+
+
+
+- 找出无用的CSS代码
+  ```js
+  const PurifyCSS = require("purifycss-webpack");
+  const glob = require("glob-all");
+  
+  new PurifyCSS({
+      paths: glob.sync([
+          // 要做CSS Tree Shaking的路径文件
+          path.resolve(__dirname, "./*.html"),
+          path.resolve(__dirname, "./src/*.js")
+      ])
+  });
+  ```
+
+### webpack bundle 文件去重
+
+如果 webpack 打包后的 bundle 文件中存在相同的模块，也属于无用代码的一种。也应该被去除掉。
+
+**使用 CommonsChunkPlugin，提取通用模块的插件**
+
+```js'
+// 自动提取所有的 node_modules 或者 引用次数两次以上的模块
+new webpack.optimize.CommonsChunkPlugin（{
+	name: "vendor",
+	minChunks: (module, count) => (
+	(module.context && module.context.indexOf("node_modules") !== -1) || count >= 2;
+	)
+}
+```
+
+minChunks 可以接受一个数值或函数，如果是函数，可自定义打包规则
+
+但使用上面记载的配置之后，并不能高枕无忧。因为这个配置只能提取所有 entry 打包后的文件中的通用模块。而现实是，有了提高性能，我们会按需加载，通过 webpack 提供的 import(...) 方法，这种按需加载的文件并不会存在于 entry 之中，所以按需加载的异步模块中通用模块并没有提取。
+
+```js
+// 提取按需加载的异步模块中的通用模块
+new webpack.optimize.CommonsChunkPluguin({
+    name: ["main", "preview", "EditPage", "MinePage"],
+    async: "async-common",
+    minChunks: 2
+})
+```
+
+配置另一个 CommonChunkPlugin，添加 async 属性，async 可以接受布尔值或字符串。当时字符串时，默认是输出文件的名字。
+
+name是异步模块的名字
+
+这里还涉及一个给异步模块命名的知识点。我是这样做的：
+
+```js
+const Edit = resolve = > { import( /* webpackChunkName: "EditPage" */ './pages/Edit/Edit' ).then((mode) => { resolve(mod.default)})};
+const PublishPage = resolve = > { import( /* webpackChunkName: "PublishPage" */ './pages/PublishPage/PublishPage' ).then((mod) => { resolve(mod)})};
+```
+
+贴一个项目的优化效果对比图
+
+<img src="https://user-gold-cdn.xitu.io/2018/1/4/160bfde2aa751805?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+
+优化效果还是比较明显的
+
+<img src="https://user-gold-cdn.xitu.io/2018/1/4/160bfde2aa34e682?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">(优化前)
+
+<img src="https://user-gold-cdn.xitu.io/2018/1/4/160bfde2ae93d057?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">（优化后）
+
+**不同的 entry 模块或者按需加载的异步模块需不需要提取通用模块**
+
+这个需要看场景，比如模块都是在线加载的，如果通用模块提取粒度过小，到导致首屏需要的文件过多，很多可能是首屏用不到的，导致首屏过慢，二级或三级页面加载会大幅度提升。所以这个就需要工具业务场景做权衡，控制通用模块提取的粒度。
+
+百度外卖的移动端应用场景是这样的，我们的所有移动端页面都做了离线化的处理。离线后，加载本地的 JS 文件，与网络无关，基本上可以忽略文件大小，所以更关注整个离线包的大小。离线包越小，耗费用户的流量越小，用户体验更好，所以离线化的场景是非常适合最小粒度通用模块的，即使所有 entry 模块和异步加载模块的引用大于2的模块都提取，这样能获得最小的输出文件，最小的离线包。
+
+
+
+
+
+# 25. loader 的执行顺序为什么是先后写的执行?
+
+只是 Webpack 选择了 compose 方式，而不是 pipe 的方式而已，在技术上实现从左到右也不会有难度。
+
+在 Uninx 中 有 pipeline 的概念，平时应该也有接触，比如 ps aux | grerg node，这些都是从左往右的。
+
+但是在函数式编程中有组合的概念，我们数字中的常见的f(g(x))，在函数式编程一般实现的方式是从右到左的，如
+
+```js
+const compose = (...fns) => x => fns.reduceRight((v, f) => f(v), x);
+const add1 = n => n + 1; // 加1
+const double = n => n * 2; // 乘2
+const add1ThenDouble = compose(
+	double,
+    add1
+);
+add1ThenDouble(2); // 6
+// ((2 + 1 = 3) * 2 = 6)
+```
+
+这里可以看到我们先执行的加1，然后执行的double，在 compose 中采用 reduceRight，所以我们传入参数的顺序编程了先传入 double，后传入 add1。
+
+那么也可以实现从左到右
+
+```js
+const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
+const add1ThenDouble = pipe(
+	add1,
+    double
+);
+add1ThenDouble(2);
+```
+
+所以只不过 webpack 选择了函数式编程的方式，所以 loader 的顺序编程了从右往左，如果 webpack 选择了 pipe 的方式，那么大家现在写 loader 的时候顺序就变成了从左到右了
+
+```js
+compose: require("style-loader!css-loader!sass-loader!./my-style.sass");
+pipe: require("./my-style-sass!sass-loader!css-loader!style-loader");
+```
+
+
+
+webpack 的实现原理
+
+1. postcss配置
+
+1. webpack性能优化手段
+
